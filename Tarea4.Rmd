@@ -1,0 +1,86 @@
+---
+title: "Tarea4"
+author: "Leonardo Alvarado"
+date: "30 de octubre de 2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Viusalización de datos (Tarea N° 4)
+
+En est script de R se presentan los resultados de la tarea N° 4 del curso **Fundamento de Ciencia de Datos** que se llevo a cabo de maner online entre el 27/09/2021 y el 20/10/2021.
+
+Esta asignación corresponde al tema de **Visualización de Datos** y los elementos a incluir son los siguientes:
+
+1. Descargar los 2 conjuntos de datos
+2. Hacer agregación de información por municipio/mes
+3. Elaborar una visualización que permita encontrar si hay correlación directa/indirecta entre las variables expuestas
+4. Crear una visualización que permita a través de filtros de años, ver el top 5 de los municipios con el valor promedio más alto para las variables estudiadas
+5. Crear visualización que presente el comportamiento histórico de los datos por municipio de tal manera que se evidencien patrones temporales climáticos
+6. De forma paralela, mostrar espacialmente los puntos de los sitios indicando para cada uno de ellos el valor máximo alcanzado
+
+Para el ejercicio se utilizó un conjunto de datos abiertos hidrometereológicos para temperatura y precipitación para el Magdalena descargados del siguiente link.
+https://invemarsantamarta-my.sharepoint.com/:f:/g/personal/leonardo_arias_invemar_org_co/EnFJInWyylZJlrCFVRy49aoBh17tTv5T1iD3deECHLfP8A?e=O5TF6E
+
+## 1. Descargar los 2 conjuntos de datos
+```{r}
+#Carga de datos
+prep_df <- read.table("Precip_MAG.csv",sep=',',header=T)
+temp_df <- read.table("Temp_MAG.csv",sep=',',header=T)
+
+#Se agrega una columna con la fecha en formato Date
+prep_df$Fecha_d <- as.Date(substr(prep_df$FechaObservacion, 0, 10),format = "%m/%d/%Y")
+temp_df$Fecha_d <- as.Date(substr(temp_df$FechaObservacion, 0, 10),format = "%m/%d/%Y")
+
+```
+
+## 2. Hacer agregación de información por municipio/mes
+
+
+```{r}
+## Preparacion de datos para agregación de las variables precipitación y temperatura
+#Se agrega una columna con el año y mes de la medición
+prep_df$YearMonth <-format(prep_df$Fecha_d,format='%Y-%m')
+temp_df$YearMonth <-format(temp_df$Fecha_d,format='%Y-%m') 
+
+#Extraemos de cada Dataframe las columnas de interes
+df_pre <- prep_df[c('Municipio', 'YearMonth', 'ValorObservado')] 
+df_tem <- temp_df[c('Municipio', 'YearMonth',  'ValorObservado')] 
+
+#Agregamos una columna con el nombre de la variable que se mide
+df_pre$Variable <- 'Precipitacion'
+df_tem$Variable <- 'Temperatura'
+
+# Se integran los datos en un solo dataframe una debajo del otro
+df_tot <- rbind(df_pre,df_tem)
+
+#Redimensionamos eldataframe para tener precipitacion y temperatura en la misma fila
+library(reshape2)
+datos2 <- dcast(df_tot, Municipio + YearMonth  ~ Variable, value.var="ValorObservado",fun.aggregate = mean)
+datos3 <- na.omit(datos2)
+
+```
+
+Se muestran los primeras filas del dataframe
+```{r}
+head(datos3)
+```
+
+### 3.Elaborar una visualización que permita encontrar si hay correlación directa/indirecta entre las variables expuestas
+
+EN el gráfico se muestra la relación entre las variables precipitación y temperatura y en la mayoría se puede apreciar una relación inversa entre ellas.
+
+```{r}
+library(ggplot2)
+ggplot(datos3, aes(x=Precipitacion, y=Temperatura)) + geom_point() + geom_smooth(method='lm', formula= y~x) + facet_grid(~ Municipio)
+
+```
+
+
+
+
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
