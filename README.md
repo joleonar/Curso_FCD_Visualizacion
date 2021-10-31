@@ -1,4 +1,4 @@
-# Curso_FCD_Visualizacion
+# Curso FCD Visualizacion
 
 En este repositorio se tiene el script en R de la asignación N°4 del curso *Fundamento de Ciencia de datos*, las tareas asignadas son las siguientes
 
