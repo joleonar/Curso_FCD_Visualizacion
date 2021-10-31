@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Viusalización de datos (Tarea N° 4)
 
-En est script de R se presentan los resultados de la tarea N° 4 del curso **Fundamento de Ciencia de Datos** que se llevo a cabo de maner online entre el 27/09/2021 y el 20/10/2021.
+En est script de R se presentan los resultados de la tarea N° 4 del curso **Fundamentos de Ciencia de Datos** que se llevo a cabo de manera online entre el 27/09/2021 y el 20/10/2021.
 
 Esta asignación corresponde al tema de **Visualización de Datos** y los elementos a incluir son los siguientes:
 
@@ -79,8 +79,32 @@ ggplot(datos3, aes(x=Precipitacion, y=Temperatura)) + geom_point() + geom_smooth
 
 ```
 
+## 4. Crear una visualización que permita a través de filtros de años, ver el top 5 de los municipios con el valor promedio más alto para las variables estudiadas
+En esta sección se gnera los graficos de barras con el top de los 5 municipios con los mayores valores promedios de precipitación y temperatura
+
+```{r}
+datos3$Year <- substr(datos3$YearMonth,1,4)
+library(dplyr)
+datos4 <- datos3 %>%  group_by(Municipio,Year) %>% summarise(prec_prom = mean(Precipitacion),
+                                                   tem_prom = mean(Temperatura))
+val_year <- 2018
+datos5 <- datos4[datos4$Year==val_year,] %>% arrange(desc(prec_prom))
+datos6 <- datos4[datos4$Year==val_year,] %>% arrange(desc(tem_prom))
+
+ggplot(datos5[1:5,], aes(reorder(x=Municipio,prec_prom), y=prec_prom)) + geom_bar(stat = "identity",color= 'white',fill="blue") +
+  xlab("Municipio")+ylab("Precipitación Promedio 2018") +
+  theme(axis.text.x = element_text(angle = 0, hjust = 1,size=8,colour="black")) + 
+  geom_text(data=datos5[1:5,],aes(x=Municipio,y=prec_prom+0.005,label=round(prec_prom,3)),hjust=0,size=4)+coord_flip()
+ggsave(filename='TopMunicipios2018_prec.png',width = 12,height = 8,dpi=300)
+
+ggplot(datos6[1:5,], aes(reorder(x=Municipio,tem_prom), y=tem_prom)) + geom_bar(stat = "identity",color= 'white',fill="blue") +
+  xlab("Municipio")+ylab("Temperatura Promedio 2018") +
+  theme(axis.text.x = element_text(angle = 0, hjust = 1,size=8,colour="black")) + 
+  geom_text(data=datos6[1:5,],aes(x=Municipio,y=tem_prom+1,label=round(tem_prom,1)),hjust=0,size=4)+coord_flip()
+ggsave(filename='TopMunicipios2018_tem.png',width = 12,height = 8,dpi=300)
+
+```
 
 
 
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
